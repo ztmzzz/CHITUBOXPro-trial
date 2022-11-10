@@ -1,5 +1,4 @@
 import time
-from PIL import Image
 from pywinauto import application, mouse
 from selenium.webdriver.common.by import By
 from selenium import webdriver
@@ -29,22 +28,26 @@ def register():
     driver = webdriver.Chrome()
     driver.delete_all_cookies()
     driver.get("https://cc.chitubox.com/register")
-    driver.execute_script("document.body.style.zoom='0.8'")
+    # driver.execute_script("document.body.style.zoom='0.8'")
+    time.sleep(5)
     email = driver.find_element(By.XPATH,
-                                '/html/body/app-root/app-layout/div/section/div/div/app-register/div/div[2]/div[1]/form/div[1]/div/input')
+                                '/html/body/app-root/app-layout/div/section/div/div/app-register/div/div/app-register-form-dialog/form/div[2]/nz-form-item[1]/nz-form-control/div/div/input')
     password = driver.find_element(By.XPATH,
-                                   '/html/body/app-root/app-layout/div/section/div/div/app-register/div/div[2]/div[1]/form/div[2]/div/input')
+                                   '/html/body/app-root/app-layout/div/section/div/div/app-register/div/div/app-register-form-dialog/form/div[2]/div[3]/div/div/nz-form-item[1]/nz-form-control/div/div/nz-input-group/input')
     password2 = driver.find_element(By.XPATH,
-                                    '/html/body/app-root/app-layout/div/section/div/div/app-register/div/div[2]/div[1]/form/div[3]/div/input')
+                                    '/html/body/app-root/app-layout/div/section/div/div/app-register/div/div/app-register-form-dialog/form/div[2]/div[3]/div/div/nz-form-item[2]/nz-form-control/div/div/nz-input-group/input')
     verify_code = driver.find_element(By.XPATH,
-                                      '/html/body/app-root/app-layout/div/section/div/div/app-register/div/div[2]/div[1]/form/div[6]/div/input')
+                                      '/html/body/app-root/app-layout/div/section/div/div/app-register/div/div/app-register-form-dialog/form/div[2]/nz-form-item[4]/nz-form-control/div/div/div/div[1]/input')
     verify_code_img = driver.find_element(By.XPATH,
-                                          '/html/body/app-root/app-layout/div/section/div/div/app-register/div/div[2]/div[1]/form/div[6]/div/img')
+                                          '/html/body/app-root/app-layout/div/section/div/div/app-register/div/div/app-register-form-dialog/form/div[2]/nz-form-item[4]/nz-form-control/div/div/div/div[2]/img')
 
-    # click_box = driver.find_element(By.XPATH,
-    #                                 '/html/body/app-root/app-layout/div/section/div/div/app-register/div/div[2]/div[1]/form/div[7]/div/div/label/input')
+    click_box = driver.find_element(By.XPATH,
+                                    '/html/body/app-root/app-layout/div/section/div/div/app-register/div/div/app-register-form-dialog/form/div[2]/nz-form-item[5]/nz-form-control/div/div/label/span[1]/input')
     submit = driver.find_element(By.XPATH,
-                                 '/html/body/app-root/app-layout/div/section/div/div/app-register/div/div[2]/div[1]/form/button')
+                                 '/html/body/app-root/app-layout/div/section/div/div/app-register/div/div/app-register-form-dialog/form/div[2]/div[5]/button')
+    driver.execute_script('document.querySelector("#fb-root").remove()')
+    driver.execute_script(
+        'document.querySelector("body > app-root > app-layout > div > section > app-global-alert").remove()')
     ran_email = ''.join(random.sample(string.ascii_letters + string.digits, 10)) + '@163.com'
     # ran_password = ''.join(random.sample(string.ascii_letters + string.digits, 8))
     ran_password = 'Chitubox123'
@@ -52,22 +55,13 @@ def register():
     password.send_keys(ran_password)
     password2.send_keys(ran_password)
     ocr = ddddocr.DdddOcr()
-    driver.save_screenshot('verify_code_img.png')
-    left = verify_code_img.location['x']  # x点的坐标
-    top = verify_code_img.location['y']  # y点的坐标
-    right = verify_code_img.size['width'] + left  # 上面右边点的坐标
-    bottom = verify_code_img.size['height'] + top  # 下面右边点的坐标
-    verify_code_img_pic = Image.open('verify_code_img.png')
-    verify_code_img_pic = verify_code_img_pic.crop((left, top, right, bottom))
-    verify_code_img_pic.save('verify_code_img.png')
+    verify_code_img.screenshot("verify_code_img.png")
     with open("verify_code_img.png", "rb") as f:
         res = ocr.classification(f.read())
         verify_code.send_keys(res)
-    # click_box.click()
-    driver.execute_script(
-        'document.querySelector("body > app-root > app-layout > div > section > div > div > app-register > div > div.account-content.mx-auto.shadow.border.bg-white > div.form-container > form > div:nth-child(7) > div > div > label > input").click()')
+    click_box.click()
     time.sleep(5)
-    submit.submit()
+    submit.click()
     time.sleep(5)
     driver.close()
     return ran_email, ran_password
@@ -124,16 +118,20 @@ def modify_machineInfo(path):
 
 
 if __name__ == '__main__':
-    print('start register a new account')
-    (email, password) = register()
-    print('new email=' + email)
-    print('new password=' + password)
-    print('start change uuid')
-    change_uuid()
-    print('start auto login')
-    print('if auto login fail, you can login manually')
-    print('email=' + email)
-    print('password=' + password)
-    # email = 'Qto3LSHjlc@163.com'
-    # password = 'Chitubox123'
-    login(email, password)
+    try:
+        print('start register a new account')
+        (email, password) = register()
+        print('new email=' + email)
+        print('new password=' + password)
+        print('start change uuid')
+        change_uuid()
+        print('start auto login')
+        print('if auto login fail, you can login manually')
+        print('email=' + email)
+        print('password=' + password)
+        login(email, password)
+    except Exception as e:
+        print('some error happen')
+        print(e)
+    finally:
+        input('Press any key to quit program.')
